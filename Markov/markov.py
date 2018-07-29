@@ -79,10 +79,31 @@ class Markov:
         total_de_pessoas_local_2 = qtd_pessoas_local['local_2']
         total_de_pessoas_local_3 = qtd_pessoas_local['local_3']
 
-        for
+
+
+        for local, lista_pessoa in localizacao_pessoa_inicial_1_min.items():
+            if local == 'local_1':
+                for pessoa in lista_pessoa:
+                    mac = pessoa['MAC']
+                    for local_60, lista_pessoa_60 in localizacao_pessoa_60_min.items():
+                        if local_60 == 'local_2':
+                            for pessoa_60 in lista_pessoa_60:
+                                mac_60 = pessoa_60['MAC']
+                                if mac == mac_60:
+                                    for local_60_2, lista_pessoa_60_2 in localizacao_pessoa_60_min.items():
+                                        if local_60_2 == 'local_3':
+                                            for pessoa_60_2 in lista_pessoa_60_2:
+                                                mac_60_2 = pessoa_60_2['MAC']
+                                                if mac_60 == mac_60_2:
+                                                                                        
+
+
+            elif
+
+
         matriz = np.matrix([
             [a11, a12, a13],
             [a21, a22, a23],
             [a31, a32, a33]
         ])
-        return
+        return matriz
