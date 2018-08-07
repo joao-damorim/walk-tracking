@@ -45,6 +45,17 @@ print(dic['lc1'])
 
 class Markov:
 
+    def calcular_total_de_pessoas_por_lugar_porcentagem(total_de_pessoas, qtd_pessoas_local):
+        a11 = qtd_pessoas_local['local_1'] / total_de_pessoas
+        a12 = qtd_pessoas_local['local_1'] / total_de_pessoas
+        a13 = qtd_pessoas_local['local_1'] / total_de_pessoas
+
+        matriz = np.matrix([
+            [a11, a12, a13],
+        ])
+
+        return matriz
+
     def qtd_de_pessoas(lista_pessoa):
 
         total = len(lista_pessoa)
@@ -128,7 +139,7 @@ class Markov:
                                 if mac == mac_60:
                                     total_a22 -= 1
                                     total_a21 += 1
-                                    
+
                     for local_60_2, lista_pessoa_60_2 in localizacao_pessoa_60_min.items():
                         if local_60_2 == 'local_3':
                             for pessoa_60_2 in lista_pessoa_60_2:
