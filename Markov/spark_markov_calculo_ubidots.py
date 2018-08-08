@@ -5,11 +5,13 @@
 
 # Imports the PySpark libraries
 from pyspark import SparkConf, SparkContext
+from pyspark.streaming import StreamingContext
 
 # The 'os' library allows us to read the environment variable SPARK_HOME defined in the IDE environment
 import os
 import numpy as np
 import json
+import pika
 import time
 import requests
 
@@ -85,6 +87,12 @@ x = arq.read()
 listaImagem = json.loads(x)
 
 print(listaImagem)
+'''
+
+listaImagemBase = sc.textFile(os.environ["SPARK_HOME"] + "/imagem.txt")
+#print(listaImagem)
+listaImagem = listaImagemBase.map(lambda x: x)
+'''
 
 m = Markov()
 
@@ -101,8 +109,28 @@ array_atual = m.calcular_total_de_pessoas_por_lugar_porcentagem(total_de_pessoas
                                                                 total_de_pessoas_em_cada_local)
 print(array_atual)
 
+local_1 = array_atual.item(0)
 
+local_2 = array_atual.item(1)
 
+local_3 = array_atual.item(2)
+
+print(local_1)
+print(local_2)
+print(local_3)
+
+'''
+host =
+user_vhost =
+passwd = 
+
+credentials = pika.PlainCredentials(user_vhost, passwd)
+connection = pika.BlockingConnection(pika.ConnectionParameters(host, 5672, user_vhost, credentials))
+channel = connection.channel()
+
+channel.exchange_declare(exchange='topic_logs',
+                         exchange_type='topic')
+'''
 
 TOKEN = "A1E-ErTiDmO2fCGKHwBgJoCV6wwv1djLUv"  # Put your TOKEN here
 DEVICE_LABEL = "walk-tracking"  # Put your device label here
@@ -111,7 +139,7 @@ VARIABLE_LABEL_2 = "Local_2"  # Put your second variable label here
 VARIABLE_LABEL_3 = "Local_3"  # Put your second variable label here
 
 
-def build_payload(variable_1, variable_2, variable_3, value_1, value_2, value_3 ):
+def build_payload(variable_1, variable_2, variable_3, value_1, value_2, value_3):
     # Creates two random values for sending data
     # Creates a random gps coordinates
     payload = {variable_1: value_1,
@@ -148,7 +176,7 @@ def post_request(payload):
 
 def main():
     payload = build_payload(
-        VARIABLE_LABEL_1, VARIABLE_LABEL_2, VARIABLE_LABEL_3)
+        VARIABLE_LABEL_1, VARIABLE_LABEL_2, VARIABLE_LABEL_3, local_1, local_2, local_3)
 
     print("[INFO] Attemping to send data")
     post_request(payload)
@@ -158,4 +186,4 @@ def main():
 if __name__ == '__main__':
     while (True):
         main()
-        time.sleep(1)
+        time.sleep(60)
