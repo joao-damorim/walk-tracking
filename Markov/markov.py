@@ -117,7 +117,7 @@ class Markov:
                             for pessoa_60 in lista_pessoa_60:
                                 mac_60 = pessoa_60['Peer MAC']
                                 if mac == mac_60:
-                                    print("mac achado no 2")
+                                    #print("mac achado no 2")
                                     total_a11 -= 1
                                     total_a12 += 1
                     for local_60_2, lista_pessoa_60_2 in localizacao_pessoa_60_min.items():
@@ -125,7 +125,7 @@ class Markov:
                             for pessoa_60_2 in lista_pessoa_60_2:
                                 mac_60_2 = pessoa_60_2['Peer MAC']
                                 if mac == mac_60_2:
-                                    print("mac achado no 3")
+                                    #print("mac achado no 3")
                                     total_a11 -= 1
                                     total_a13 += 1
 
@@ -183,7 +183,7 @@ class Markov:
         a32 = total_a32/total_de_pessoas_local_3
 
         a33 = total_a33/total_de_pessoas_local_3
-
+        '''
         print(total_a11)
         print(total_a12)
         print(total_a13)
@@ -203,12 +203,8 @@ class Markov:
         print(a31)
         print(a32)
         print(a33)
-
-        matriz = np.matrix([
-            [a11, a12, a13],
-            [a21, a22, a23],
-            [a31, a32, a33],
-        ])
+        '''
+        matriz = [[a11, a12, a13],[a21, a22, a23],[a31, a32, a33]]
 
         return matriz
 
@@ -223,19 +219,46 @@ listaReal = json.loads(x)
 localizacao_imagem = Markov.localizacao_pessoa(listaImagem)
 localizacao_real = Markov.localizacao_pessoa(listaReal)
 
-print(localizacao_imagem)
+#print(localizacao_imagem)
 
 qtd_pessoas_em_cada_local_imagem = Markov.qtd_de_pessoas_em_cada_local(localizacao_imagem)
-print(qtd_pessoas_em_cada_local_imagem)
+#print(qtd_pessoas_em_cada_local_imagem)
 
 matriz_transicao = Markov.calcular_matriz_de_transicao(qtd_pessoas_em_cada_local_imagem, localizacao_imagem, localizacao_real)
-print(matriz_transicao)
+#print(matriz_transicao)
+'''
+arq_matriz = open('matriz_de_transicao.json','w')
+arq_matriz.du(matriz_transicao)
+arq_matriz.close()
+'''
+with open('meu_arquivo.json', 'w') as f:
+    json.dump(matriz_transicao, f)
 
-matriz_transicao_passada = matriz_transicao
+with open('meu_arquivo.json', 'r') as f:
+    matriz_transicao_passada = json.load(f)
 
+'''
+arq_matriz_recebida = open('matriz_de_transicao.txt','r')
+matriz = arq_matriz_recebida.readline()
+matriz_transicao_passada = matriz
+print(matriz_transicao_passada)
+'''
+print(matriz_transicao_passada)
+linha_1 = matriz_transicao_passada[0]
+linha_2 = matriz_transicao_passada[1]
+linha_3 = matriz_transicao_passada[2]
+
+#print(linha_1)
+
+matriz_transicao_passada = np.matrix([
+    linha_1,
+    linha_2,
+    linha_3,
+])
 array_atual = np.matrix([
     [20, 30, 50]
 ])
 
 x = np.dot(array_atual, matriz_transicao_passada)
 print(x)
+
