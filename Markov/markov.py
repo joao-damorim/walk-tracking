@@ -231,10 +231,10 @@ arq_matriz = open('matriz_de_transicao.json','w')
 arq_matriz.du(matriz_transicao)
 arq_matriz.close()
 '''
-with open('meu_arquivo.json', 'w') as f:
+with open('matriz_de_transicao.json', 'w') as f:
     json.dump(matriz_transicao, f)
 
-with open('meu_arquivo.json', 'r') as f:
+with open('matriz_de_transicao.json', 'r') as f:
     matriz_transicao_passada = json.load(f)
 
 '''
@@ -248,7 +248,9 @@ linha_1 = matriz_transicao_passada[0]
 linha_2 = matriz_transicao_passada[1]
 linha_3 = matriz_transicao_passada[2]
 
-#print(linha_1)
+print(linha_1)
+print(linha_2)
+print(linha_3)
 
 matriz_transicao_passada = np.matrix([
     linha_1,
