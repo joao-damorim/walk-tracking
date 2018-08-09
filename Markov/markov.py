@@ -208,31 +208,32 @@ class Markov:
 
         return matriz
 
-arq= open('imagem.txt','r')
-x = arq.read()
-listaImagem = json.loads(x)
-arq = open('real.txt','r')
-x = arq.read()
-listaReal = json.loads(x)
+while True:
+    arq= open('imagem.txt','r')
+    x = arq.read()
+    listaImagem = json.loads(x)
+    arq = open('real.txt','r')
+    x = arq.read()
+    listaReal = json.loads(x)
 
 
-localizacao_imagem = Markov.localizacao_pessoa(listaImagem)
-localizacao_real = Markov.localizacao_pessoa(listaReal)
+    localizacao_imagem = Markov.localizacao_pessoa(listaImagem)
+    localizacao_real = Markov.localizacao_pessoa(listaReal)
 
-#print(localizacao_imagem)
+    #print(localizacao_imagem)
 
-qtd_pessoas_em_cada_local_imagem = Markov.qtd_de_pessoas_em_cada_local(localizacao_imagem)
-#print(qtd_pessoas_em_cada_local_imagem)
+    qtd_pessoas_em_cada_local_imagem = Markov.qtd_de_pessoas_em_cada_local(localizacao_imagem)
+    #print(qtd_pessoas_em_cada_local_imagem)
 
-matriz_transicao = Markov.calcular_matriz_de_transicao(qtd_pessoas_em_cada_local_imagem, localizacao_imagem, localizacao_real)
-#print(matriz_transicao)
-'''
-arq_matriz = open('matriz_de_transicao.json','w')
-arq_matriz.du(matriz_transicao)
-arq_matriz.close()
-'''
-with open('matriz_de_transicao.json', 'w') as f:
-    json.dump(matriz_transicao, f)
+    matriz_transicao = Markov.calcular_matriz_de_transicao(qtd_pessoas_em_cada_local_imagem, localizacao_imagem, localizacao_real)
+    #print(matriz_transicao)
+    '''
+    arq_matriz = open('matriz_de_transicao.json','w')
+    arq_matriz.du(matriz_transicao)
+    arq_matriz.close()
+    '''
+    with open('matriz_de_transicao.json', 'w') as f:
+        json.dump(matriz_transicao, f)
 
 with open('matriz_de_transicao.json', 'r') as f:
     matriz_transicao_passada = json.load(f)
