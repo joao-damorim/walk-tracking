@@ -109,11 +109,26 @@ array_atual = m.calcular_total_de_pessoas_por_lugar_porcentagem(total_de_pessoas
                                                                 total_de_pessoas_em_cada_local)
 print(array_atual)
 
-local_1 = array_atual.item(0)
+with open('matriz_de_transicao.json', 'r') as f:
+    matriz_transicao_passada = json.load(f)
 
-local_2 = array_atual.item(1)
+linha_1 = matriz_transicao_passada[0]
+linha_2 = matriz_transicao_passada[1]
+linha_3 = matriz_transicao_passada[2]
 
-local_3 = array_atual.item(2)
+matriz_transicao_passada = np.matrix([
+    linha_1,
+    linha_2,
+    linha_3,
+])
+
+array_futuro = np.dot(array_atual, matriz_transicao_passada)
+
+local_1 = array_futuro.item(0)
+
+local_2 = array_futuro.item(1)
+
+local_3 = array_futuro.item(2)
 
 print(local_1)
 print(local_2)
@@ -186,4 +201,4 @@ def main():
 if __name__ == '__main__':
     while (True):
         main()
-        time.sleep(60)
+        time.sleep(600)
