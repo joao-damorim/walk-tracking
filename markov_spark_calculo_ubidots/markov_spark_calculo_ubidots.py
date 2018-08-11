@@ -14,6 +14,7 @@ import json
 import pika
 import time
 import requests
+import sys
 
 # Configure the Spark context to give a name to the application
 sparkConf = SparkConf().setAppName("WordCount")
@@ -31,7 +32,6 @@ wordCounts = textFile.flatMap(lambda line: line.split()) \
 
 # Executes the DAG (Directed Acyclic Graph) for counting and collecting the result
 # for wc in wordCounts.collect(): print wc
-
 
 class Markov():
 
@@ -81,58 +81,6 @@ class Markov():
 
         return matriz
 
-
-arq = open('imagem.txt', 'r')
-x = arq.read()
-listaImagem = json.loads(x)
-
-print(listaImagem)
-'''
-
-listaImagemBase = sc.textFile(os.environ["SPARK_HOME"] + "/imagem.txt")
-#print(listaImagem)
-listaImagem = listaImagemBase.map(lambda x: x)
-'''
-
-m = Markov()
-
-total_de_pessoas_3_locais = m.qtd_de_pessoas(listaImagem)
-print(total_de_pessoas_3_locais)
-
-localizacao_pessoas_3_locais = m.localizacao_pessoa(listaImagem)
-print(localizacao_pessoas_3_locais)
-
-total_de_pessoas_em_cada_local = m.qtd_de_pessoas_em_cada_local(localizacao_pessoas_3_locais)
-print(total_de_pessoas_em_cada_local)
-
-array_atual = m.calcular_total_de_pessoas_por_lugar_porcentagem(total_de_pessoas_3_locais,
-                                                                total_de_pessoas_em_cada_local)
-print(array_atual)
-
-with open('matriz_de_transicao.json', 'r') as f:
-    matriz_transicao_passada = json.load(f)
-
-linha_1 = matriz_transicao_passada[0]
-linha_2 = matriz_transicao_passada[1]
-linha_3 = matriz_transicao_passada[2]
-
-matriz_transicao_passada = np.matrix([
-    linha_1,
-    linha_2,
-    linha_3,
-])
-
-array_futuro = np.dot(array_atual, matriz_transicao_passada)
-
-local_1 = array_futuro.item(0)
-
-local_2 = array_futuro.item(1)
-
-local_3 = array_futuro.item(2)
-
-print(local_1)
-print(local_2)
-print(local_3)
 
 '''
 host =
@@ -189,16 +137,79 @@ def post_request(payload):
     return True
 
 
-def main():
-    payload = build_payload(
-        VARIABLE_LABEL_1, VARIABLE_LABEL_2, VARIABLE_LABEL_3, local_1, local_2, local_3)
+def main(controle):
+    timeout = 1  # [seconds]
 
-    print("[INFO] Attemping to send data")
-    post_request(payload)
-    print("[INFO] finished")
+    timeout_start = time.time()
+
+    while time.time() < timeout_start + timeout:
+        try:
+            controle = str(controle)
+            arq = open('Imagem_' + controle + '.txt', 'r')
+            x = arq.read()
+            listaImagem = json.loads(x)
+
+            # print(listaImagem)
+            '''
+            listaImagemBase = sc.textFile(os.environ["SPARK_HOME"] + "/imagem.txt")
+            #print(listaImagem)
+            listaImagem = listaImagemBase.map(lambda x: x)
+            '''
+            m = Markov()
+
+            total_de_pessoas_3_locais = m.qtd_de_pessoas(listaImagem)
+            # print(total_de_pessoas_3_locais)
+
+            localizacao_pessoas_3_locais = m.localizacao_pessoa(listaImagem)
+            # print(localizacao_pessoas_3_locais)
+
+            total_de_pessoas_em_cada_local = m.qtd_de_pessoas_em_cada_local(localizacao_pessoas_3_locais)
+            # print(total_de_pessoas_em_cada_local)
+
+            array_atual = m.calcular_total_de_pessoas_por_lugar_porcentagem(total_de_pessoas_3_locais,
+                                                                            total_de_pessoas_em_cada_local)
+            # print(array_atual)
+
+            with open('matriz_de_transicao_' + controle + '.json', 'r') as f:
+                matriz_transicao_passada = json.load(f)
+
+            linha_1 = matriz_transicao_passada[0]
+            linha_2 = matriz_transicao_passada[1]
+            linha_3 = matriz_transicao_passada[2]
+
+            matriz_transicao_passada = np.matrix([
+                linha_1,
+                linha_2,
+                linha_3,
+            ])
+
+            array_futuro = np.dot(array_atual, matriz_transicao_passada)
+
+            local_1 = array_futuro.item(0)
+
+            local_2 = array_futuro.item(1)
+
+            local_3 = array_futuro.item(2)
+
+            print(local_1)
+            print(local_2)
+            print(local_3)
+
+            payload = build_payload(
+                VARIABLE_LABEL_1, VARIABLE_LABEL_2, VARIABLE_LABEL_3, local_1, local_2, local_3)
+
+            print("[INFO] Attemping to send data")
+            post_request(payload)
+            print("[INFO] finished")
+        except IOError:
+            print
+            "Fim da execucao da aplicacao!"
+            sys.exit()
 
 
 if __name__ == '__main__':
+    controle = 0
     while (True):
-        main()
-        time.sleep(600)
+        main(controle)
+        controle += 1
+        time.sleep(20)
