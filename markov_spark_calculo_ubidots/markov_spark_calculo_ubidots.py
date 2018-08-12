@@ -15,23 +15,8 @@ import pika
 import time
 import requests
 import sys
+import paho.mqtt.client as mqtt
 
-# Configure the Spark context to give a name to the application
-sparkConf = SparkConf().setAppName("WordCount")
-sc = SparkContext(conf=sparkConf)
-
-# The text file containing the words to count (this is the Spark README file)
-textFile = sc.textFile(os.environ["SPARK_HOME"] + "/README.md")
-
-# The code for counting the words (note that the execution mode is lazy)
-# Uses the same paradigm Map and Reduce of Hadoop, but fully in memory
-wordCounts = textFile.flatMap(lambda line: line.split()) \
-    .map(lambda word: (word, 1)) \
-    .reduceByKey(lambda a, b: a + b)
-
-
-# Executes the DAG (Directed Acyclic Graph) for counting and collecting the result
-# for wc in wordCounts.collect(): print wc
 
 class Markov():
 
@@ -94,7 +79,6 @@ channel = connection.channel()
 channel.exchange_declare(exchange='topic_logs',
                          exchange_type='topic')
 '''
-
 TOKEN = "A1E-ErTiDmO2fCGKHwBgJoCV6wwv1djLUv"  # Put your TOKEN here
 DEVICE_LABEL = "walk-tracking"  # Put your device label here
 VARIABLE_LABEL_1 = "Local_1"  # Put your first variable label here
@@ -138,78 +122,127 @@ def post_request(payload):
 
 
 def main(controle):
-    timeout = 1  # [seconds]
+    # broker="127.0.0.1"
+    # port = 18830
+    # topic="v1/devices/me/telemetry"
+    # username = "w2Qex2nHmBph7VFF6zlaJ"
+    # password = ""
 
-    timeout_start = time.time()
+    arqTempo = open('tempos.txt', 'r')
+    tempos = arqTempo.read().split("\n")
+    # print(tempos)
+    arqTempo.close()
 
-    while time.time() < timeout_start + timeout:
+    path = os.getcwd()
+    # print(path)
+    listDir = os.listdir(path)
+    # print(listDir)
+
+    for arquivo in listDir:
+        # print(arquivo)
+        # print(controle)
         try:
-            controle = str(controle)
-            arq = open('Imagem_' + controle + '.txt', 'r')
-            x = arq.read()
-            listaImagem = json.loads(x)
+            if (arquivo == "imagem_" + str(tempos[controle]) + ".txt"):
+                print("aqui")
 
-            # print(listaImagem)
-            '''
-            listaImagemBase = sc.textFile(os.environ["SPARK_HOME"] + "/imagem.txt")
-            #print(listaImagem)
-            listaImagem = listaImagemBase.map(lambda x: x)
-            '''
-            m = Markov()
+                timeout = 1  # [seconds]
 
-            total_de_pessoas_3_locais = m.qtd_de_pessoas(listaImagem)
-            # print(total_de_pessoas_3_locais)
+                timeout_start = time.time()
 
-            localizacao_pessoas_3_locais = m.localizacao_pessoa(listaImagem)
-            # print(localizacao_pessoas_3_locais)
+                while time.time() < timeout_start + timeout:
+                    try:
+                        # controle = str(controle)
+                        print(str(tempos[controle]))
+                        arq = open('imagem_' + str(tempos[controle]) + '.txt', 'r')
+                        x = arq.read()
+                        listaImagem = json.loads(x)
 
-            total_de_pessoas_em_cada_local = m.qtd_de_pessoas_em_cada_local(localizacao_pessoas_3_locais)
-            # print(total_de_pessoas_em_cada_local)
+                        # print(listaImagem)
+                        '''
+                        listaImagemBase = sc.textFile(os.environ["SPARK_HOME"] + "/imagem.txt")
+                        #print(listaImagem)
+                        listaImagem = listaImagemBase.map(lambda x: x)
+                        '''
+                        m = Markov()
 
-            array_atual = m.calcular_total_de_pessoas_por_lugar_porcentagem(total_de_pessoas_3_locais,
-                                                                            total_de_pessoas_em_cada_local)
-            # print(array_atual)
+                        total_de_pessoas_3_locais = m.qtd_de_pessoas(listaImagem)
+                        # print(total_de_pessoas_3_locais)
 
-            with open('matriz_de_transicao_' + controle + '.json', 'r') as f:
-                matriz_transicao_passada = json.load(f)
+                        localizacao_pessoas_3_locais = m.localizacao_pessoa(listaImagem)
+                        # print(localizacao_pessoas_3_locais)
 
-            linha_1 = matriz_transicao_passada[0]
-            linha_2 = matriz_transicao_passada[1]
-            linha_3 = matriz_transicao_passada[2]
+                        total_de_pessoas_em_cada_local = m.qtd_de_pessoas_em_cada_local(localizacao_pessoas_3_locais)
+                        # print(total_de_pessoas_em_cada_local)
 
-            matriz_transicao_passada = np.matrix([
-                linha_1,
-                linha_2,
-                linha_3,
-            ])
+                        array_atual = m.calcular_total_de_pessoas_por_lugar_porcentagem(total_de_pessoas_3_locais,
+                                                                                        total_de_pessoas_em_cada_local)
+                        # print(array_atual)
 
-            array_futuro = np.dot(array_atual, matriz_transicao_passada)
+                        with open('matriz_de_transicao_' + str(controle) + '.json', 'r') as f:
+                            matriz_transicao_passada = json.load(f)
 
-            local_1 = array_futuro.item(0)
+                        linha_1 = matriz_transicao_passada[0]
+                        linha_2 = matriz_transicao_passada[1]
+                        linha_3 = matriz_transicao_passada[2]
 
-            local_2 = array_futuro.item(1)
+                        matriz_transicao_passada = np.matrix([
+                            linha_1,
+                            linha_2,
+                            linha_3,
+                        ])
 
-            local_3 = array_futuro.item(2)
+                        array_futuro = np.dot(array_atual, matriz_transicao_passada)
 
-            print(local_1)
-            print(local_2)
-            print(local_3)
+                        local_1 = array_futuro.item(0)
 
-            payload = build_payload(
-                VARIABLE_LABEL_1, VARIABLE_LABEL_2, VARIABLE_LABEL_3, local_1, local_2, local_3)
+                        local_2 = array_futuro.item(1)
 
-            print("[INFO] Attemping to send data")
-            post_request(payload)
-            print("[INFO] finished")
-        except IOError:
+                        local_3 = array_futuro.item(2)
+
+                        print(local_1)
+                        print(local_2)
+                        print(local_3)
+
+                        # client = mqtt.Client("P1")
+                        # if (username != ""):
+                        #    client.username_pw_set(username, password)
+                        # client.connect(broker, port)
+
+                        # data = dict()
+                        # data["local_1"] = local_1
+                        # data["local_2"] = local_2
+                        # data["local_3"] = local_3
+                        # data_out = json.dumps(data)
+                        # print("publish topic", topic, "data out = ", data_out)
+                        # client.publish(topic, data_out,0)
+
+                        payload = build_payload(
+                            VARIABLE_LABEL_1, VARIABLE_LABEL_2, VARIABLE_LABEL_3, local_1, local_2, local_3)
+
+                        print("[INFO] Attemping to send data")
+                        post_request(payload)
+                        print("[INFO] finished")
+                    except IOError:
+                        print
+                        "Fim da execucao da aplicacao!"
+                        sys.exit()
+        except IndexError:
             print
             "Fim da execucao da aplicacao!"
             sys.exit()
 
 
 if __name__ == '__main__':
-    controle = 0
     while (True):
-        main(controle)
-        controle += 1
-        time.sleep(20)
+        controle = 0
+        path = os.getcwd()
+        # print(path)
+        listDir = os.listdir(path)
+        start = "imagem_1533393900.txt"
+        if (start in listDir):
+            while (True):
+                main(controle)
+                controle += 1
+                time.sleep(5)
+        print("Procurando arquivo de imagem para estimativa!")
+        time.sleep(10)
