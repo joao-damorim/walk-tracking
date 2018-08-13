@@ -151,12 +151,10 @@ for i in (0,1,2,3):
     x = arq.read()
     listaReal = json.loads(x)
 
-
     localizacao_imagem = Markov.localizacao_pessoa(listaImagem)
     localizacao_real = Markov.localizacao_pessoa(listaReal)
-
     #print(localizacao_imagem)
-
+    
     qtd_pessoas_em_cada_local_imagem = Markov.qtd_de_pessoas_em_cada_local(localizacao_imagem)
     print(qtd_pessoas_em_cada_local_imagem)
 
@@ -165,29 +163,4 @@ for i in (0,1,2,3):
 
     with open('matriz_de_transicao_'+num+'.json', 'w') as f:
         json.dump(matriz_transicao, f)
-'''
-with open('matriz_de_transicao.json', 'r') as f:
-    matriz_transicao_passada = json.load(f)
 
-print(matriz_transicao_passada)
-
-linha_1 = matriz_transicao_passada[0]
-linha_2 = matriz_transicao_passada[1]
-linha_3 = matriz_transicao_passada[2]
-
-print(linha_1)
-print(linha_2)
-print(linha_3)
-
-matriz_transicao_passada = np.matrix([
-    linha_1,
-    linha_2,
-    linha_3,
-])
-array_atual = np.matrix([
-    [20, 30, 50]
-])
-
-x = np.dot(array_atual, matriz_transicao_passada)
-print(x)
-'''

@@ -66,19 +66,6 @@ class Markov():
 
         return matriz
 
-
-'''
-host =
-user_vhost =
-passwd = 
-
-credentials = pika.PlainCredentials(user_vhost, passwd)
-connection = pika.BlockingConnection(pika.ConnectionParameters(host, 5672, user_vhost, credentials))
-channel = connection.channel()
-
-channel.exchange_declare(exchange='topic_logs',
-                         exchange_type='topic')
-'''
 TOKEN = "A1E-ErTiDmO2fCGKHwBgJoCV6wwv1djLUv"  # Put your TOKEN here
 DEVICE_LABEL = "walk-tracking"  # Put your device label here
 VARIABLE_LABEL_1 = "Local_1"  # Put your first variable label here
@@ -122,25 +109,15 @@ def post_request(payload):
 
 
 def main(controle):
-    # broker="127.0.0.1"
-    # port = 18830
-    # topic="v1/devices/me/telemetry"
-    # username = "w2Qex2nHmBph7VFF6zlaJ"
-    # password = ""
 
     arqTempo = open('tempos.txt', 'r')
     tempos = arqTempo.read().split("\n")
-    # print(tempos)
     arqTempo.close()
 
     path = os.getcwd()
-    # print(path)
     listDir = os.listdir(path)
-    # print(listDir)
 
     for arquivo in listDir:
-        # print(arquivo)
-        # print(controle)
         try:
             if (arquivo == "imagem_" + str(tempos[controle]) + ".txt"):
                 print("aqui")
@@ -151,18 +128,11 @@ def main(controle):
 
                 while time.time() < timeout_start + timeout:
                     try:
-                        # controle = str(controle)
                         print(str(tempos[controle]))
                         arq = open('imagem_' + str(tempos[controle]) + '.txt', 'r')
                         x = arq.read()
                         listaImagem = json.loads(x)
 
-                        # print(listaImagem)
-                        '''
-                        listaImagemBase = sc.textFile(os.environ["SPARK_HOME"] + "/imagem.txt")
-                        #print(listaImagem)
-                        listaImagem = listaImagemBase.map(lambda x: x)
-                        '''
                         m = Markov()
 
                         total_de_pessoas_3_locais = m.qtd_de_pessoas(listaImagem)
@@ -203,40 +173,27 @@ def main(controle):
                         print(local_2)
                         print(local_3)
 
-                        # client = mqtt.Client("P1")
-                        # if (username != ""):
-                        #    client.username_pw_set(username, password)
-                        # client.connect(broker, port)
-
-                        # data = dict()
-                        # data["local_1"] = local_1
-                        # data["local_2"] = local_2
-                        # data["local_3"] = local_3
-                        # data_out = json.dumps(data)
-                        # print("publish topic", topic, "data out = ", data_out)
-                        # client.publish(topic, data_out,0)
-
                         payload = build_payload(
                             VARIABLE_LABEL_1, VARIABLE_LABEL_2, VARIABLE_LABEL_3, local_1, local_2, local_3)
 
                         print("[INFO] Attemping to send data")
                         post_request(payload)
                         print("[INFO] finished")
+
                     except IOError:
                         print
                         "Fim da execucao da aplicacao!"
                         sys.exit()
+
         except IndexError:
             print
             "Fim da execucao da aplicacao!"
             sys.exit()
 
-
 if __name__ == '__main__':
     while (True):
         controle = 0
         path = os.getcwd()
-        # print(path)
         listDir = os.listdir(path)
         start = "imagem_1533393900.txt"
         if (start in listDir):
